@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashish Kumar — Full-Stack &amp; Game Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2310141a'/%3E%3Ctext x='24' y='72' font-family='monospace' font-weight='700' font-size='60' fill='%23e8a33d'%3E%24%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg: #10141a;
+    --surface: #171d24;
+    --surface-2: #1d242c;
+    --rule: #2a323b;
+    --ink: #ecebe4;
+    --ink-dim: #9aa4ad;
+    --ink-faint: #5f6a73;
+    --amber: #e8a33d;
+    --amber-dim: #6b552a;
+    --teal: #5cb3a3;
+    --teal-dim: #2c463f;
+    --red-dot: #d9695f;
+    --yellow-dot: #e0b64f;
+    --green-dot: #6fae7e;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --maxw: 920px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; } }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.6;
+    font-size:16px;
+  }
+
+  a{ color:var(--amber); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--teal); outline-offset:3px; border-radius:2px; }
+
+  h1,h2,h3{ font-family:var(--display); font-weight:600; margin:0; color:var(--ink); }
+
+  .mono{ font-family:var(--mono); }
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width: 860px){
+    .shell{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    border-right:1px solid var(--rule);
+    padding:28px 20px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+  @media (max-width: 860px){
+    .sidebar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      height:auto;
+      border-right:none;
+      border-bottom:1px solid var(--rule);
+      padding:14px 18px;
+      background:var(--bg);
+    }
+    .nav-toggle{ display:inline-flex; }
+    .nav-panel{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .25s ease;
+    }
+    .nav-panel.open{
+      max-height:520px;
+      margin-top:14px;
+    }
+  }
+
+  .sidebar-root{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink-faint);
+    letter-spacing:0.02em;
+  }
+
+  .sidebar-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+  }
+
+  .nav-toggle{
+    display:none;
+    align-items:center;
+    gap:6px;
+    background:var(--surface-2);
+    border:1px solid var(--rule);
+    color:var(--ink-dim);
+    font-family:var(--mono);
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .nav-toggle:hover{ color:var(--ink); border-color:var(--amber); }
+  .toggle-icon{ font-size:10px; display:inline-block; transition:transform .2s ease; }
+  .nav-toggle[aria-expanded="true"] .toggle-icon{ transform:rotate(180deg); }
+
+  .file-tree{ list-style:none; margin:0; padding:0; font-family:var(--mono); font-size:13.5px; }
+  .file-tree li{ margin:2px 0; }
+  .file-tree a{
+    color:var(--ink-dim);
+    display:block;
+    padding:5px 8px;
+    border-radius:4px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .file-tree a:hover, .file-tree a:focus-visible{
+    color:var(--ink);
+    background:var(--surface-2);
+    text-decoration:none;
+  }
+  .file-tree a.active{ color:var(--amber); background:var(--surface-2); }
+  .file-tree .indent{ padding-left:20px; color:var(--ink-faint); }
+  .file-tree .dir::before{ content:"▸ "; color:var(--ink-faint); }
+
+  .sidebar-status{
+    margin-top:28px;
+    padding-top:16px;
+    border-top:1px solid var(--rule);
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+  .status-dot{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green-dot); margin-right:6px; }
+
+  /* ---------- main ---------- */
+  main{ padding: 0 28px 80px; }
+  @media (max-width: 860px){ main{ padding: 0 18px 60px; } }
+
+  .container{ max-width:var(--maxw); margin:0 auto; }
+
+  /* ---------- hero / terminal ---------- */
+  .hero{ padding:64px 0 40px; }
+  .terminal{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 20px 60px -30px rgba(0,0,0,0.6);
+  }
+  .terminal-bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--rule);
+  }
+  .dot{ width:10px; height:10px; border-radius:50%; }
+  .dot.red{ background:var(--red-dot); }
+  .dot.yellow{ background:var(--yellow-dot); }
+  .dot.green{ background:var(--green-dot); }
+  .terminal-title{ margin-left:8px; font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
+  .terminal-body{ padding:22px 24px 26px; font-family:var(--mono); font-size:14.5px; }
+  .terminal-line{ margin:0 0 6px; color:var(--ink-dim); }
+  .terminal-line .prompt{ color:var(--teal); }
+  .terminal-line .out{ color:var(--ink); }
+  .cursor{ display:inline-block; width:8px; height:15px; background:var(--amber); vertical-align:middle; margin-left:2px; animation: blink 1s steps(1) 6; animation-fill-mode:forwards; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .hero-tagline{
+    margin-top:26px;
+    font-size:19px;
+    color:var(--ink-dim);
+    max-width:640px;
+  }
+  .hero-tagline strong{ color:var(--ink); font-weight:600; }
+
+  .hero-links{ margin-top:20px; display:flex; gap:18px; flex-wrap:wrap; font-family:var(--mono); font-size:13.5px; }
+  .hero-links a{ color:var(--ink-dim); border-bottom:1px solid var(--rule); padding-bottom:2px; }
+  .hero-links a:hover{ color:var(--amber); border-color:var(--amber); text-decoration:none; }
+
+  .resume-btn{
+    display:inline-block;
+    margin-top:22px;
+    padding:10px 18px;
+    border:1px solid var(--amber);
+    border-radius:6px;
+    color:var(--amber);
+    font-size:13.5px;
+    letter-spacing:0.02em;
+    transition:background .15s ease, color .15s ease;
+  }
+  .resume-btn:hover{ background:var(--amber); color:var(--bg); text-decoration:none; }
+
+  /* ---------- section shell ---------- */
+  section{ padding:56px 0; border-top:1px solid var(--rule); }
+  section:first-of-type{ border-top:none; }
+
+  .section-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:28px; }
+  .section-tag{ font-family:var(--mono); font-size:12px; color:var(--amber); background:var(--amber-dim); padding:3px 8px; border-radius:4px; letter-spacing:0.03em; }
+  .section-tag::before{ content:"// "; opacity:0.65; }
+  .section-head h2{ font-size:24px; }
+
+  .prose{ color:var(--ink-dim); max-width:680px; }
+  .prose p{ margin:0 0 14px; }
+
+  /* ---------- experience log ---------- */
+  .log-entry{ display:grid; grid-template-columns: 130px 1fr; gap:20px; margin-bottom:8px; }
+  @media (max-width: 640px){ .log-entry{ grid-template-columns:1fr; gap:6px; } }
+  .log-date{ font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); padding-top:3px; }
+  .log-content h3{ font-size:18px; margin-bottom:2px; }
+  .log-role{ font-family:var(--mono); font-size:13px; color:var(--teal); margin-bottom:12px; }
+  .log-content ul{ margin:0; padding-left:18px; color:var(--ink-dim); }
+  .log-content li{ margin-bottom:8px; }
+  .log-content li::marker{ color:var(--ink-faint); }
+
+  /* ---------- projects / release cards ---------- */
+  .release{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:26px 26px 24px;
+    margin-bottom:22px;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .release:hover{
+    transform:translateY(-3px);
+    border-color:var(--amber-dim);
+    box-shadow:0 16px 40px -24px rgba(0,0,0,0.6);
+  }
+  .release-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:6px; }
+  .release-title{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .release-title h3{ font-size:19px; }
+  .version{ font-family:var(--mono); font-size:12px; color:var(--bg); background:var(--amber); padding:2px 8px; border-radius:4px; font-weight:600; }
+  .version.beta{ background:var(--teal); }
+  .release-date{ font-family:var(--mono); font-size:12px; color:var(--ink-faint); white-space:nowrap; }
+  .release-tagline{ color:var(--ink-dim); margin:6px 0 14px; font-size:15px; }
+  .deps{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+  .dep{ font-family:var(--mono); font-size:11.5px; color:var(--teal); background:var(--teal-dim); padding:3px 8px; border-radius:4px; }
+  .commits{ list-style:none; margin:0; padding:0; }
+  .commits li{ font-size:14.5px; color:var(--ink-dim); padding-left:20px; position:relative; margin-bottom:9px; }
+  .commits li::before{ content:"›"; position:absolute; left:0; color:var(--amber); font-family:var(--mono); }
+  .release-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:14px;
+    padding:7px 14px;
+    border:1px solid var(--teal-dim);
+    border-radius:6px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--teal);
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .release-link:hover{ background:var(--teal); color:var(--bg); border-color:var(--teal); text-decoration:none; }
+
+  /* ---------- skills ---------- */
+  .skills-json{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:24px 26px;
+    font-family:var(--mono);
+    font-size:13.5px;
+    overflow-x:auto;
+  }
+  .skills-json .brace{ color:var(--ink-faint); }
+  .skills-row{ margin:4px 0 4px 18px; }
+  .skills-key{ color:var(--teal); }
+  .skills-val{ color:var(--ink-dim); }
+  .skills-val .item{ color:var(--ink); }
+
+  /* ---------- contact ---------- */
+  .contact-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px; margin-top:24px; }
+  .contact-card{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:18px 20px;
+  }
+  .contact-card .label{ font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+  .contact-card .value{ font-family:var(--mono); font-size:14.5px; color:var(--ink); word-break:break-word; }
+  .contact-card a{ color:var(--ink); }
+  .contact-card a:hover{ color:var(--amber); }
+
+  footer{ padding:30px 0 50px; text-align:center; font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" aria-label="Section navigation">
+    <div class="sidebar-top">
+      <div class="sidebar-root">~/ashish-kumar</div>
+      <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel">
+        <span class="mono">menu</span><span class="toggle-icon" aria-hidden="true">▾</span>
+      </button>
+    </div>
+    <div class="nav-panel" id="navPanel">
+      <ul class="file-tree">
+        <li><a href="#about">about.md</a></li>
+        <li><a href="#experience">experience.log</a></li>
+        <li><a href="#projects" class="dir">projects/</a></li>
+        <li><a href="#innovate" class="indent">innovate</a></li>
+        <li><a href="#rag-agent" class="indent">rag-research-agent</a></li>
+        <li><a href="#cafe-finder" class="indent">cafe-finder</a></li>
+        <li><a href="#task-rbac" class="indent">task-management-rbac-api</a></li>
+        <li><a href="#cdn-simulator" class="indent">cdn-simulator</a></li>
+        <li><a href="#lumora-skin" class="indent">lumora-skin</a></li>
+        <li><a href="#skills">skills.json</a></li>
+        <li><a href="#contact">contact</a></li>
+      </ul>
+      <div class="sidebar-status">
+        <span class="status-dot"></span>open to opportunities
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+    <div class="container">
+
+      <!-- HERO -->
+      <div class="hero">
+        <div class="terminal">
+          <div class="terminal-bar">
+            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            <span class="terminal-title">ashish@portfolio: ~</span>
+          </div>
+          <div class="terminal-body">
+            <p class="terminal-line"><span class="prompt">$</span> whoami</p>
+            <p class="terminal-line"><span class="out">ashish-kumar</span></p>
+            <p class="terminal-line"><span class="prompt">$</span> cat role.txt</p>
+            <p class="terminal-line"><span class="out">Full-Stack Developer &amp; Game Developer</span></p>
+            <p class="terminal-line"><span class="prompt">$</span> location --show</p>
+            <p class="terminal-line"><span class="out">Patna, Bihar, India<span class="cursor"></span></span></p>
+          </div>
+        </div>
+        <p class="hero-tagline">
+          I build <strong>full-stack web apps</strong> with React, Next.js and Node,
+          and <strong>mobile games</strong> with Unity and C# — with a B.Tech in
+          Computer Science.
+        </p>
+        <div class="hero-links">
+          <a href="mailto:ashishraj58707@gmail.com">ashishraj58707@gmail.com</a>
+          <a href="tel:+919798433763">+91 97984 33763</a>
+          <a href="https://github.com/ashish0o0" target="_blank" rel="noopener">github.com/ashish0o0</a>
+          <a href="https://www.linkedin.com/in/ashish0o0/" target="_blank" rel="noopener">linkedin.com/in/ashish0o0</a>
+        </div>
+        <a class="resume-btn" href="resume.pdf" target="_blank" rel="noopener" download>
+          <span class="mono">↓ download resume.pdf</span>
+        </a>
+      </div>
+
+      <!-- ABOUT -->
+      <section id="about">
+        <div class="section-head">
+          <span class="section-tag">about.md</span>
+          <h2>About</h2>
+        </div>
+        <div class="prose">
+          <p>
+            I'm a Computer Science graduate from Gurukula Kangri (Deemed to be University),
+            Haridwar — B.Tech, Class of 2026. Over the past year I've worked across two very different
+            corners of software: shipping gameplay systems for a mobile title in Unity, and
+            building full-stack web platforms — authentication, role-based access, and
+            production-style architecture — from scratch.
+          </p>
+          <p>
+            I like projects that force me to own the whole stack: designing the API, modeling
+            the database, and building an interface someone would actually enjoy using. Outside
+            of assigned work, I build personal projects to try out patterns I haven't used yet —
+            RBAC systems, geolocation apps, and AI-assisted research tools.
+          </p>
+        </div>
+      </section>
+
+      <!-- EXPERIENCE -->
+      <section id="experience">
+        <div class="section-head">
+          <span class="section-tag">experience.log</span>
+          <h2>Work Experience</h2>
+        </div>
+        <div class="log-entry">
+          <div class="log-date">Jul 2025 —<br>Nov 2025</div>
+          <div class="log-content">
+            <h3>Jabsz <span style="color:var(--ink-faint); font-weight:400;">· Remote</span></h3>
+            <div class="log-role">Unity Developer Intern</div>
+            <ul>
+              <li>Developed a mobile game for the Google Play Store, building upon and refining a foundational prototype using Unity and C#.</li>
+              <li>Scripted key gameplay systems, UI elements, and player controls to enhance the core user experience.</li>
+              <li>Improved game stability and performance by identifying and resolving 50+ bugs within the existing codebase.</li>
+              <li>Collaborated with the development team using Git and GitHub for version control and feature integration.</li>
+              <li>Gained hands-on experience across the full mobile game development lifecycle and collaborative workflows.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section id="projects">
+        <div class="section-head">
+          <span class="section-tag">projects/</span>
+          <h2>Project Releases</h2>
+        </div>
+        <p class="prose" style="margin-bottom:26px;">Tagged in the order I built them — each one picked up where the last left off.</p>
+
+        <!-- v1 RAG Agent -->
+        <article class="release" id="rag-agent">
+          <div class="release-head">
+            <div class="release-title">
+              <h3>Multi-Modal RAG Research Agent</h3>
+              <span class="version">v1.0.0</span>
+            </div>
+            <span class="release-date mono">Jan 2026 – May 2026 · B.Tech Capstone</span>
+          </div>
+          <p class="release-tagline">Frontend for an AI research assistant that reads PDFs, web pages, and video through one chat interface.</p>
+          <div class="deps">
+            <span class="dep">React</span><span class="dep">TypeScript</span><span class="dep">FastAPI</span><span class="dep">RAG</span><span class="dep">Semantic Search</span>
+          </div>
+          <ul class="commits">
+            <li>Built the frontend for a multi-modal AI research assistant handling PDFs, web pages, and video through a unified chat interface.</li>
+            <li>Built responsive, reusable React components for document uploads, source management, live chat, and AI response visualization.</li>
+            <li>Integrated with FastAPI backend APIs for document indexing, conversational querying, and retrieval workflows.</li>
+            <li>Designed upload progress tracking, source status monitoring, chat history, and markdown-rendered responses.</li>
+            <li>Used React Hooks and TypeScript for state management, reusability, and maintainable architecture.</li>
+            <li>Collaborated on the underlying RAG system, combining semantic search with AI-powered document Q&amp;A.</li>
+          </ul>
+          <a class="release-link" href="https://github.com/ashish0o0/Multi-Model-Rag-Agent" target="_blank" rel="noopener">→ github.com/ashish0o0/Multi-Model-Rag-Agent</a>
+        </article>
+
+        <!-- v2 Cafe Finder -->
+        <article class="release" id="cafe-finder">
+          <div class="release-head">
+            <div class="release-title">
+              <h3>Café Finder</h3>
+              <span class="version">v2.0.0</span>
+            </div>
+            <span class="release-date mono">Feb 2026 – Mar 2026 · Personal Project</span>
+          </div>
+          <p class="release-tagline">A mobile-first app that finds nearby cafés and routes you there — no login required.</p>
+          <div class="deps">
+            <span class="dep">React</span><span class="dep">TypeScript</span><span class="dep">Vite</span><span class="dep">Leaflet</span><span class="dep">Overpass API</span>
+          </div>
+          <ul class="commits">
+            <li>Built a mobile-first café discovery app in React and TypeScript that finds nearby cafés using live location.</li>
+            <li>Integrated OpenStreetMap data through the Overpass API to pull real-time café listings without a paid maps service.</li>
+            <li>Added turn-by-turn walking, cycling, and driving directions using OSRM routing, with ETAs for each mode.</li>
+            <li>Engineered automatic failover across multiple Overpass API mirrors with request caching to keep searches fast.</li>
+            <li>Implemented amenity filters (Open Now, WiFi, Outdoor Seating) and multiple sort options.</li>
+            <li>Added favorites and one-click sharing via localStorage — no account needed.</li>
+            <li>Designed a coffee-themed UI with a responsive layout, including a mobile bottom-sheet drawer.</li>
+          </ul>
+          <a class="release-link" href="https://github.com/ashish0o0/Cafe-Finder" target="_blank" rel="noopener">→ github.com/ashish0o0/Cafe-Finder</a>
+        </article>
+
+        <!-- v3 Task RBAC -->
+        <article class="release" id="task-rbac">
+          <div class="release-head">
+            <div class="release-title">
+              <h3>Task-Management-RBAC-API</h3>
+              <span class="version">v3.0.0</span>
+            </div>
+            <span class="release-date mono">Mar 2026 – Apr 2026 · Backend Assignment</span>
+          </div>
+          <p class="release-tagline">A REST API with JWT auth and role-based permissions, built to a take-home spec.</p>
+          <div class="deps">
+            <span class="dep">FastAPI</span><span class="dep">PostgreSQL</span><span class="dep">SQLAlchemy</span><span class="dep">JWT</span><span class="dep">Docker</span><span class="dep">React</span>
+          </div>
+          <ul class="commits">
+            <li>Built a FastAPI + PostgreSQL REST API with JWT authentication and role-based access control for user/admin scopes.</li>
+            <li>Implemented full CRUD task endpoints with ownership-based access control, so users only see their own tasks.</li>
+            <li>Secured passwords with bcrypt hashing and generated stateless JWT tokens for sessionless auth.</li>
+            <li>Designed a flexible auth handler accepting both JSON payloads and OAuth2 form data for Swagger UI compatibility.</li>
+            <li>Containerized the backend, frontend, and database with Docker Compose for one-command local deployment.</li>
+            <li>Built a React dashboard with task search, status filters, and toast notifications to consume the API.</li>
+            <li>Documented all endpoints with Swagger/ReDoc and shipped a Postman collection for manual testing.</li>
+          </ul>
+          <a class="release-link" href="https://github.com/ashish0o0/Task-management-rbac-api/tree/main" target="_blank" rel="noopener">→ github.com/ashish0o0/Task-management-rbac-api</a>
+        </article>
+
+        <!-- v4 CDN Simulator -->
+        <article class="release" id="cdn-simulator">
+          <div class="release-head">
+            <div class="release-title">
+              <h3>CDN Simulator</h3>
+              <span class="version">v4.0.0</span>
+            </div>
+            <span class="release-date mono">May 2026 – Jun 2026 · Personal Project</span>
+          </div>
+          <p class="release-tagline">A simulated content delivery network that routes by geography, caches at the edge, and fails over in real time.</p>
+          <div class="deps">
+            <span class="dep">Python</span><span class="dep">Flask</span><span class="dep">D3.js</span><span class="dep">Docker</span><span class="dep">Gunicorn</span>
+          </div>
+          <ul class="commits">
+            <li>Built a full-stack CDN simulator in Python and Flask, modeling geolocation-based routing, edge caching, and failover across a network of server nodes.</li>
+            <li>Implemented Haversine great-circle distance calculations to automatically route each request to the nearest operational edge node or origin server.</li>
+            <li>Engineered an edge cache engine with LRU eviction and TTL expiration, distinguishing fast cache HITs (~18ms) from origin-fetched MISSes (~180ms).</li>
+            <li>Simulated real-world network conditions with configurable 5G/4G/3G speed profiles and randomized latency jitter.</li>
+            <li>Built failover resilience — toggling edge nodes online or offline in real time reroutes traffic to the next nearest available node.</li>
+            <li>Designed a dark, NOC-style dashboard with D3.js and TopoJSON world maps, rendering live curved request arcs and streaming request logs.</li>
+            <li>Made metrics thread-safe with Python's threading.Lock() and containerized the app with Docker and Gunicorn for production-style deployment.</li>
+          </ul>
+          <a class="release-link" href="https://github.com/ashish0o0/CDN_Simulator_Model" target="_blank" rel="noopener">→ github.com/ashish0o0/CDN_Simulator_Model</a>
+        </article>
+
+        <!-- v5 Lumora Skin -->
+        <article class="release" id="lumora-skin">
+          <div class="release-head">
+            <div class="release-title">
+              <h3>Lumora Skin</h3>
+              <span class="version">v5.0.0</span>
+            </div>
+            <span class="release-date mono">Jun 2026 – Jul 2026 · Personal Project</span>
+          </div>
+          <p class="release-tagline">An 11-page skincare storefront with a personalized quiz engine — built entirely in vanilla JavaScript.</p>
+          <div class="deps">
+            <span class="dep">HTML5</span><span class="dep">CSS3</span><span class="dep">JavaScript</span><span class="dep">WCAG AA</span>
+          </div>
+          <ul class="commits">
+            <li>Built an 11-page e-commerce storefront for a skincare brand using vanilla HTML5, CSS3, and JavaScript — no frameworks.</li>
+            <li>Designed an interactive 4-step skin quiz that recommends a personalized routine and saves results to localStorage.</li>
+            <li>Implemented live search and category filtering across products, matching titles, descriptions, and active ingredients in real time.</li>
+            <li>Built a 2-column checkout with a sticky order summary that calculates subtotals, promo discounts, shipping, and totals live.</li>
+            <li>Added clinical ingredient tooltips explaining actives like Niacinamide and Bakuchiol in plain language on hover or tap.</li>
+            <li>Ensured WCAG AA accessibility with visible focus rings, verified color contrast ratios, and reduced-motion support.</li>
+            <li>Established a consistent design system — a scoped color palette and three-typeface hierarchy — applied across all 11 pages.</li>
+          </ul>
+          <a class="release-link" href="https://github.com/ashish0o0/lumora-skin-storefront" target="_blank" rel="noopener">→ github.com/ashish0o0/lumora-skin-storefront</a>
+        </article>
+
+        <!-- v6 Innovate -->
+        <article class="release" id="innovate">
+          <div class="release-head">
+            <div class="release-title">
+              <h3>Innovate</h3>
+              <span class="version beta">v6.0.0-beta</span>
+            </div>
+            <span class="release-date mono">Jul 2026 – Present · Personal Project</span>
+          </div>
+          <p class="release-tagline">A full-stack platform where people post, discuss, and evolve startup ideas together.</p>
+          <div class="deps">
+            <span class="dep">Next.js</span><span class="dep">TypeScript</span><span class="dep">Node.js</span><span class="dep">Express.js</span><span class="dep">Prisma</span><span class="dep">PostgreSQL</span><span class="dep">Docker</span><span class="dep">Tailwind</span>
+          </div>
+          <ul class="commits">
+            <li>Built a full-stack platform where users post, discuss, and collaboratively improve startup and invention ideas.</li>
+            <li>Built a scalable monorepo architecture using Next.js, Express.js, and TypeScript for streamlined development.</li>
+            <li>Engineered secure REST APIs with Prisma and PostgreSQL for auth, posts, follows, messaging, and idea management.</li>
+            <li>Implemented JWT authentication and bcrypt password hashing to protect user sessions and routes.</li>
+            <li>Designed a responsive dark-mode UI with Tailwind CSS, glassmorphism, and an interactive social feed.</li>
+            <li>Built an "Idea Evolution" system with improvement submissions, version tracking, and contributor collaboration.</li>
+            <li>Integrated Docker Compose for containerized PostgreSQL and consistent dev environments.</li>
+            <li>Created automated auditing tools for UI/UX quality, SEO, security, and performance checks.</li>
+          </ul>
+        </article>
+
+      </section>
+
+      <!-- SKILLS -->
+      <section id="skills">
+        <div class="section-head">
+          <span class="section-tag">skills.json</span>
+          <h2>Skills</h2>
+        </div>
+        <div class="skills-json">
+          <div><span class="brace">{</span></div>
+          <div class="skills-row"><span class="skills-key">"languages"</span>: <span class="skills-val">[<span class="item">HTML5</span>, <span class="item">CSS3</span>, <span class="item">JavaScript (ES6+)</span>, <span class="item">TypeScript</span>, <span class="item">Python</span>, <span class="item">C</span>, <span class="item">C++</span>, <span class="item">C#</span>]</span>,</div>
+          <div class="skills-row"><span class="skills-key">"frameworks"</span>: <span class="skills-val">[<span class="item">React.js</span>, <span class="item">Next.js</span>, <span class="item">Express.js</span>, <span class="item">Flask</span>, <span class="item">Tailwind CSS</span>, <span class="item">Prisma ORM</span>, <span class="item">LangChain</span>, <span class="item">TanStack Query</span>, <span class="item">D3.js</span>]</span>,</div>
+          <div class="skills-row"><span class="skills-key">"backend"</span>: <span class="skills-val">[<span class="item">PostgreSQL</span>, <span class="item">Node.js</span>, <span class="item">REST APIs</span>, <span class="item">JWT Auth</span>, <span class="item">HTTP</span>, <span class="item">JSON</span>]</span>,</div>
+          <div class="skills-row"><span class="skills-key">"tools"</span>: <span class="skills-val">[<span class="item">Git</span>, <span class="item">GitHub</span>, <span class="item">Docker</span>, <span class="item">VS Code</span>, <span class="item">Cursor</span>, <span class="item">Android Studio</span>, <span class="item">Unity Hub</span>, <span class="item">Tiled</span>, <span class="item">Ollama</span>]</span>,</div>
+          <div class="skills-row"><span class="skills-key">"apis"</span>: <span class="skills-val">[<span class="item">REST APIs</span>, <span class="item">API Routes</span>, <span class="item">OpenAI API</span>]</span></div>
+          <div><span class="brace">}</span></div>
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section id="contact">
+        <div class="section-head">
+          <span class="section-tag">contact</span>
+          <h2>Get in touch</h2>
+        </div>
+        <p class="prose">Open to full-stack and game development roles, internships, and freelance work.</p>
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="label">Email</div>
+            <div class="value"><a href="mailto:ashishraj58707@gmail.com">ashishraj58707@gmail.com</a></div>
+          </div>
+          <div class="contact-card">
+            <div class="label">Phone</div>
+            <div class="value"><a href="tel:+919798433763">+91 97984 33763</a></div>
+          </div>
+          <div class="contact-card">
+            <div class="label">GitHub</div>
+            <div class="value"><a href="https://github.com/ashish0o0" target="_blank" rel="noopener">github.com/ashish0o0</a></div>
+          </div>
+          <div class="contact-card">
+            <div class="label">LinkedIn</div>
+            <div class="value"><a href="https://www.linkedin.com/in/ashish0o0/" target="_blank" rel="noopener">linkedin.com/in/ashish0o0</a></div>
+          </div>
+        </div>
+      </section>
+
+      <footer>Patna, Bihar, India — built by Ashish Kumar</footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  var toggle = document.getElementById('navToggle');
+  var panel = document.getElementById('navPanel');
+  if(toggle && panel){
+    toggle.addEventListener('click', function(){
+      var isOpen = panel.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    panel.querySelectorAll('a').forEach(function(link){
+      link.addEventListener('click', function(){
+        panel.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  var navLinks = document.querySelectorAll('.file-tree a');
+  var watched = document.querySelectorAll('main section[id], main article[id]');
+  if('IntersectionObserver' in window && watched.length && navLinks.length){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var id = entry.target.getAttribute('id');
+          navLinks.forEach(function(link){
+            link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+          });
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    watched.forEach(function(el){ observer.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
